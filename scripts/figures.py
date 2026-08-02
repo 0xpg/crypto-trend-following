@@ -66,7 +66,7 @@ def fig_single_market(t1: pd.DataFrame, claims: dict) -> None:
     ax.hist(t1["sharpe_net"], bins=45, color=C1, alpha=0.75, lw=0)
     med = t1["sharpe_net"].median()
     ax.axvline(med, color=C2, lw=1.4, label=f"median {med:+.2f}")
-    ax.axvline(0.2, color=C3, lw=1.4, ls="--", label="thread's 0.2")
+    ax.axvline(0.2, color=C3, lw=1.4, ls="--", label="0.2 reference")
     ax.axvline(0.0, color=MUTED, lw=0.8)
     ax.set_xlabel("annualized Sharpe, one market, net of costs and funding")
     ax.set_ylabel("markets")
@@ -83,7 +83,7 @@ def fig_horizons(t5: pd.DataFrame) -> None:
     ax.plot(t5["slow"], t5["median_single_market_sharpe"], color=C2, lw=1.3,
             marker="s", ms=3.5, ls="--", label="median single market")
     ax.axvspan(91, 183, color=C3, alpha=0.12, lw=0)
-    ax.text(130, ax.get_ylim()[1] * 0.05, "thread's 3-6 months",
+    ax.text(130, ax.get_ylim()[1] * 0.05, "medium-term reference",
             ha="center", fontsize=8, color=INK2)
     ax.axhline(0, color=MUTED, lw=0.8)
     ax.set_xscale("log", base=2)
@@ -102,7 +102,7 @@ def fig_risk(daily: pd.DataFrame, no_target: pd.DataFrame, claims: dict) -> None
     ax.hist(ratio, bins=60, color=C1, alpha=0.8, lw=0)
     for x, c in ((0.3, C8), (3.0, C8)):
         ax.axvline(x, color=c, lw=1.3, ls="--")
-    ax.text(0.31, ax.get_ylim()[1] * 0.9, "thread's 0.3x-3x", fontsize=8,
+    ax.text(0.31, ax.get_ylim()[1] * 0.9, "0.3x-3x reference range", fontsize=8,
             color=C8)
     ax.set_xlabel("untargeted risk / its own mean")
     ax.set_ylabel("days")

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Measure the twelve claims of SOURCE.md against the Binance universe.
+"""Measure a set of trend-following research questions on the Binance universe.
 
 C1-C5 are properties of the signal, not of the full book, so they are
 measured on single-market vol-targeted return streams that reuse exactly the
@@ -49,7 +49,7 @@ def single_market_returns(panels: dict[str, pd.DataFrame], config: Config,
 
     Each market is held at ``vol_target / sigma_hat`` times its response, so
     every stream targets the same volatility on its own. This is the object
-    the thread's "0.2 Sharpe on a single market" claim is about.
+    the single-market trend-strength research question is about.
     """
     inputs = prepare_inputs(panels, config, speeds=speeds)
     resp = np.asarray(response(inputs.signal.to_numpy(), config.response))

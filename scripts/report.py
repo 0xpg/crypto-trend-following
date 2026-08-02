@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Assemble results/report.md from the run tables and claim measurements."""
+"""Assemble a research report from run tables and diagnostic measurements."""
 
 from __future__ import annotations
 

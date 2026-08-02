@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import date, timedelta
+import json
+from pathlib import Path
 
 import ccxt
 import numpy as np
@@ -13,14 +15,30 @@ import streamlit as st
 from engine import Config, performance_summary, prepare_inputs, response, simulate
 from scripts.ccxt_backtest import DEFAULT_SYMBOLS, build_panels, fetch_daily
 
+PROJECT = Path(__file__).resolve().parent
+SAVED_DAILY = PROJECT / "results" / "ccxt_daily.csv"
+SAVED_SUMMARY = PROJECT / "results" / "ccxt_summary.json"
+
 st.set_page_config(page_title="Crypto Trend Following", page_icon="📈", layout="wide")
 
 st.markdown("""
 <style>
-.block-container {max-width: 1220px; padding-top: 1.8rem;}
-.pipeline {display:grid;grid-template-columns:repeat(7,minmax(110px,1fr));gap:.55rem;margin:.5rem 0 1.4rem;}
-.pipe-step {background:#252c34;border-radius:12px;padding:.75rem .45rem;text-align:center;min-height:68px;display:flex;align-items:center;justify-content:center;}
-@media(max-width:900px){.pipeline{grid-template-columns:repeat(2,1fr)}}
+.stApp {background:radial-gradient(circle at 78% 4%,rgba(45,212,191,.10),transparent 26%),radial-gradient(circle at 20% 18%,rgba(99,102,241,.10),transparent 30%);}
+.block-container {max-width: 1220px; padding-top: 1.5rem;}
+.hero {padding:1.4rem 1.6rem;border-left:5px solid #2dd4bf;background:linear-gradient(110deg,rgba(45,212,191,.13),rgba(99,102,241,.08));border-radius:0 18px 18px 0;margin-bottom:1.4rem;}
+.hero-kicker {color:#2dd4bf;letter-spacing:.14em;text-transform:uppercase;font-size:.78rem;font-weight:600;margin-bottom:.35rem;}
+.hero h1 {padding:0;margin:0 0 .35rem;font-size:2.25rem;}
+.hero p {margin:0;opacity:.72;max-width:760px;}
+.pipeline {display:flex;align-items:flex-start;gap:.35rem;margin:.4rem 0 1.7rem;}
+.pipe-step {flex:1;min-width:0;text-align:center;position:relative;padding:.25rem;}
+.pipe-step:not(:last-child):after {content:"";position:absolute;top:18px;left:64%;width:72%;height:2px;background:linear-gradient(90deg,#2dd4bf,rgba(99,102,241,.35));z-index:0;}
+.pipe-number {width:36px;height:36px;margin:0 auto .55rem;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#2dd4bf,#6366f1);color:#07111c;font-weight:700;position:relative;z-index:1;box-shadow:0 0 0 5px rgba(45,212,191,.08);}
+.pipe-label {font-size:.84rem;line-height:1.25;opacity:.82;}
+div[data-testid="stMetric"] {background:linear-gradient(145deg,rgba(45,212,191,.08),rgba(99,102,241,.06));border:1px solid rgba(148,163,184,.16);padding:1rem;border-radius:16px;}
+div[data-testid="stMetricValue"] {color:#5eead4;}
+section[data-testid="stSidebar"] {border-right:1px solid rgba(45,212,191,.15);}
+div[data-testid="stButton"] button[kind="primary"] {background:linear-gradient(90deg,#0f766e,#4f46e5);border:0;}
+@media(max-width:900px){.pipeline{display:grid;grid-template-columns:repeat(2,1fr)}.pipe-step:not(:last-child):after{display:none}.hero h1{font-size:1.75rem}}
 </style>
 """, unsafe_allow_html=True)
 
@@ -56,11 +74,16 @@ def run_backtest(frames, config: Config):
     return result, performance_summary(result.daily, "dashboard")
 
 
-st.title("Crypto Trend-Following Lab")
-st.caption("Configure the seven-component CTA system, fetch public perpetual candles through CCXT, and inspect the resulting portfolio.")
+st.markdown("""
+<div class="hero">
+  <div class="hero-kicker">Ask a question. Change one assumption. Measure the answer.</div>
+  <h1>Trend Atlas Research Lab</h1>
+  <p>Explore when diversified crypto trends persist, where portfolio construction helps, and which assumptions make the evidence disappear.</p>
+</div>
+""", unsafe_allow_html=True)
 
 with st.sidebar:
-    st.header("Backtest configuration")
+    st.header("Design your question")
     exchange_id = st.selectbox("Exchange", ["binanceusdm"], help="Public USD-M perpetual market data through CCXT.")
     symbols = st.multiselect("Assets", DEFAULT_SYMBOLS, default=list(DEFAULT_SYMBOLS))
     custom = st.text_input("Additional CCXT symbols", placeholder="TRX/USDT:USDT, SUI/USDT:USDT")
@@ -76,7 +99,7 @@ with st.sidebar:
     max_leverage = st.slider("Maximum gross leverage", 0.5, 5.0, 2.0, 0.25)
     clusters = st.slider("Risk clusters", 1, 12, 4, 1)
     min_history = st.slider("Minimum history (days)", 60, 365, 120, 15)
-    run_clicked = st.button("Fetch data and run", type="primary", use_container_width=True)
+    run_clicked = st.button("Run this experiment", type="primary", use_container_width=True)
     st.caption("CCXT mode uses complete daily candles and excludes historical funding. No API key is required.")
 
 config = replace(
@@ -87,15 +110,32 @@ config = replace(
     min_median_quote_volume=0.0, apply_funding=False,
 )
 
-steps = [
-    f"1. {len(symbols)} eligible markets", "2. MA trend signal",
-    f"3. {response_kind} + inverse vol", f"4. {config.n_clusters} equal-risk clusters",
-    f"5. {target_vol:.0%} portfolio vol target", f"6. {buffer:.0%} no-trade buffer",
-    f"7. {cost_bps} bps costs + funding",
-]
-st.markdown('<div class="pipeline">' + ''.join(f'<div class="pipe-step">{s}</div>' for s in steps) + '</div>', unsafe_allow_html=True)
+# Show the repository's reproducible CCXT run immediately. A custom run made
+# from the sidebar replaces this snapshot in the same performance section.
+if "last_result" not in st.session_state and SAVED_DAILY.exists() and SAVED_SUMMARY.exists():
+    saved_daily = pd.read_csv(SAVED_DAILY, parse_dates=["date"]).set_index("date")
+    st.session_state["last_result"] = saved_daily
+    st.session_state["last_summary"] = json.loads(SAVED_SUMMARY.read_text(encoding="utf-8"))
+    st.session_state["last_assets"] = [
+        symbol.replace("/", "").replace(":USDT", "") for symbol in DEFAULT_SYMBOLS
+    ]
+    st.session_state["last_source"] = "Bundled CCXT baseline"
 
-st.subheader("Signal-to-position explorer")
+steps = [
+    f"{len(symbols)} markets", "Trend ensemble",
+    f"{response_kind} sizing", f"{config.n_clusters} risk clusters",
+    f"{target_vol:.0%} vol target", f"{buffer:.0%} trade buffer",
+    f"{cost_bps} bps execution",
+]
+st.markdown(
+    '<div class="pipeline">' + ''.join(
+        f'<div class="pipe-step"><div class="pipe-number">{i}</div><div class="pipe-label">{label}</div></div>'
+        for i, label in enumerate(steps, 1)
+    ) + '</div>',
+    unsafe_allow_html=True,
+)
+
+st.subheader("Question 1 · How should signal strength become exposure?")
 explore_left, explore_right = st.columns([1, 2])
 with explore_left:
     signal_value = st.slider("Combined trend signal", -4.0, 4.0, 1.0, 0.05)
@@ -130,6 +170,7 @@ if run_clicked:
                 st.session_state["last_result"] = result.daily
                 st.session_state["last_summary"] = summary
                 st.session_state["last_assets"] = sorted(frames)
+                st.session_state["last_source"] = "Custom CCXT run"
             except Exception as exc:
                 st.exception(exc)
 
@@ -137,7 +178,8 @@ if "last_result" in st.session_state:
     daily = st.session_state["last_result"]
     summary = st.session_state["last_summary"]
     st.divider()
-    st.subheader("Backtest results")
+    st.subheader("Evidence · Backtest performance")
+    st.caption(st.session_state.get("last_source", "CCXT backtest"))
     cols = st.columns(6)
     cols[0].metric("Total return", f"{summary['total_return']:.1%}")
     cols[1].metric("CAGR", f"{summary['cagr']:.1%}")
@@ -153,7 +195,7 @@ if "last_result" in st.session_state:
     c1, c2 = st.columns(2)
     c1.line_chart(drawdown, height=240, y_label="drawdown")
     c2.line_chart(daily[["gross_exposure", "net_exposure"]], height=240, y_label="notional ($)")
-    st.caption(f"Fetched assets: {', '.join(st.session_state['last_assets'])}. Trading costs included; funding excluded in CCXT mode.")
+    st.caption(f"Assets: {', '.join(st.session_state['last_assets'])}. Trading costs included; funding excluded in CCXT mode.")
     st.download_button("Download daily results (CSV)", daily.to_csv().encode("utf-8"), "trend_backtest_daily.csv", "text/csv")
 else:
     st.info("Choose a configuration and click **Fetch data and run**. The first fetch may take a few seconds per asset; repeated configurations reuse cached candles for one hour.")

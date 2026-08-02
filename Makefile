@@ -30,4 +30,4 @@ test:
 	$(PYTHON) -m unittest discover -s tests -v
 
 clean:
-	rm -rf results/*.csv results/*.json results/*.parquet results/figures/*.png results/report.md
+	rm -rf results/*.parquet results/report.md
