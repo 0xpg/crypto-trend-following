@@ -1,0 +1,50 @@
+{
+  "min_history_days": 120,
+  "volume_lookback": 30,
+  "min_median_quote_volume": 5000000.0,
+  "min_hours_per_day": 20,
+  "vol_short_window": 60,
+  "vol_long_cap_days": 3650,
+  "vol_blend_short": 0.7,
+  "vol_floor_annual": 0.2,
+  "vol_forecast": "blend",
+  "vol_ewma_span": 60,
+  "speeds": [
+    [
+      16,
+      48
+    ],
+    [
+      32,
+      96
+    ],
+    [
+      64,
+      192
+    ]
+  ],
+  "signal_scale_window": 365,
+  "signal_scale_min_periods": 60,
+  "signal_clip": 6.0,
+  "response": "tanh",
+  "sizing": "inverse_vol",
+  "use_sector_weights": true,
+  "corr_rebuild_days": 7,
+  "corr_window": 180,
+  "corr_min_obs": 100,
+  "corr_shrinkage": 0.3,
+  "n_clusters": 8,
+  "vol_target_annual": 0.2,
+  "use_risk_targeting": true,
+  "fixed_multiplier": null,
+  "max_gross_leverage": 2.0,
+  "max_short_frac_gross": null,
+  "buffer": 0.1,
+  "cost_bps": 10.0,
+  "apply_funding": true,
+  "initial_equity": 100000.0,
+  "start": "2020-01-01",
+  "end": "2026-07-22",
+  "no_target_fixed_multiplier": 0.0057542761634465376,
+  "no_target_design_risk_ratio": 1.000314144869499
+}

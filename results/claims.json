@@ -1,0 +1,78 @@
+{
+  "C1": {
+    "markets": 268,
+    "min_days": 730,
+    "mean_sharpe_net": 0.07032448690450675,
+    "median_sharpe_net": 0.09550173848738268,
+    "mean_sharpe_gross": 0.1425055511565877,
+    "median_sharpe_gross": 0.1679417283439507,
+    "quantiles_net": {
+      "0.1": -0.4508585857010316,
+      "0.25": -0.18602106614732167,
+      "0.5": 0.09550173848738268,
+      "0.75": 0.32691606436982473,
+      "0.9": 0.5399029925429204
+    },
+    "share_positive_net": 0.6044776119402985,
+    "claimed": 0.2
+  },
+  "C2_C3": {
+    "return_basis": "gross",
+    "sharpe_at_1": 0.3857624922667421,
+    "sharpe_at_max_n": 0.6118113099063459,
+    "max_n": 290,
+    "observed_multiple_1_to_max": 1.5859792545183435,
+    "c3_expansion": {
+      "from_n": 64,
+      "to_n": 290,
+      "from_sharpe": 0.6085741949196739,
+      "to_sharpe": 0.6118113099063459,
+      "observed_multiple": 1.0053191788506564,
+      "claimed_multiple": "1.5-2.0"
+    }
+  },
+  "C4": {
+    "markets": 268,
+    "effective_breadth_of_strategy_returns": 3.8074576766893546,
+    "effective_breadth_shrinkage_0p30": 3.654104802930663,
+    "mean_pairwise_correlation": 0.2598808079466918,
+    "nominal_breadth": 268,
+    "clusters": 8,
+    "oos_split": "2023-01-01",
+    "oos_markets": 127,
+    "oos_effective_breadth_train": 2.3672297947893197
+  },
+  "C5": {
+    "best_slow_span_days": 48,
+    "best_slow_months": 1.6,
+    "best_portfolio_sharpe": 0.3195571669939002,
+    "source_typical_months": "3-6"
+  },
+  "C10": {
+    "days": 2267,
+    "claimed_range": [
+      0.3,
+      3.0
+    ],
+    "risk_to_target_quantiles": {
+      "0.01": 0.11868055677230792,
+      "0.05": 0.2550189696938431,
+      "0.25": 0.7986276443169698,
+      "0.5": 1.1847592573871808,
+      "0.75": 1.5288044295043743,
+      "0.95": 2.2355513346088633,
+      "0.99": 2.570015739798361
+    },
+    "risk_to_target_min": 0.048164649730668495,
+    "risk_to_target_max": 2.9245053012042908,
+    "share_outside_claimed_range": 0.05734450816056462
+  },
+  "risk_model": {
+    "mean_pairwise_correlation_of_prices": 0.5716085050021272,
+    "mean_effective_breadth_of_prices": 1.8166202965320473,
+    "last_effective_breadth": 3.477251011864611,
+    "mean_markets_in_risk_model": 153.29012345679013,
+    "max_markets_in_risk_model": 290.0
+  },
+  "funding_coverage_of_tradeable_symbol_days": 0.9874679144077259
+}
